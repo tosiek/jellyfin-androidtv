@@ -38,6 +38,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.UUID
 
+@Suppress("LongMethod")
 @Composable
 fun SettingsAuthenticationServerScreen(serverId: UUID) {
 	val router = LocalRouter.current
@@ -105,6 +106,20 @@ fun SettingsAuthenticationServerScreen(serverId: UUID) {
 		}
 
 		item { ListSection(headingContent = { Text(stringResource(R.string.lbl_server)) }) }
+
+		item {
+			ListButton(
+				headingContent = { Text(stringResource(R.string.tls_certificates)) },
+				captionContent = { Text(server?.address.orEmpty()) },
+				onClick = {
+					router.push(
+						route = Routes.AUTHENTICATION_SERVER_CERTIFICATES,
+						parameters = mapOf("serverId" to serverId.toString()),
+					)
+				},
+				modifier = Modifier.focusKey("certificates")
+			)
+		}
 
 		item {
 			ListButton(
