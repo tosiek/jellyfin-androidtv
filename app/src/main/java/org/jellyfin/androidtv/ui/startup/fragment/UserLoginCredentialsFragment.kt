@@ -21,6 +21,7 @@ import org.jellyfin.androidtv.auth.model.ServerUnavailableState
 import org.jellyfin.androidtv.auth.model.ServerVersionNotSupported
 import org.jellyfin.androidtv.auth.repository.ServerRepository
 import org.jellyfin.androidtv.databinding.FragmentUserLoginCredentialsBinding
+import org.jellyfin.androidtv.tls.TlsMessages
 import org.jellyfin.androidtv.ui.startup.UserLoginViewModel
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
 
@@ -87,8 +88,11 @@ class UserLoginCredentialsFragment : Fragment() {
 
 						AuthenticatingState -> binding.error.setText(R.string.login_authenticating)
 						RequireSignInState -> binding.error.setText(R.string.login_invalid_credentials)
-						ServerUnavailableState,
-						is ApiClientErrorLoginState -> binding.error.setText(R.string.login_server_unavailable)
+						ServerUnavailableState -> binding.error.setText(R.string.login_server_unavailable)
+						// A TLS problem (untrusted server, missing client certificate) is explained
+						is ApiClientErrorLoginState -> binding.error.text = userLoginViewModel.server.value?.address
+							?.let { TlsMessages.describe(requireContext(), it, state.error) }
+							?: getString(R.string.login_server_unavailable)
 						// Do nothing because the activity will respond to the new session
 						AuthenticatedState -> Unit
 						// Not initialized

@@ -20,6 +20,7 @@ import kotlinx.coroutines.launch
 import org.jellyfin.androidtv.auth.repository.SessionRepository
 import org.jellyfin.androidtv.auth.repository.UserRepository
 import org.jellyfin.androidtv.integration.LeanbackChannelWorker
+import org.jellyfin.androidtv.tls.TlsProblemToast
 import org.jellyfin.androidtv.ui.InteractionTrackerViewModel
 import org.jellyfin.androidtv.ui.background.AppBackground
 import org.jellyfin.androidtv.ui.base.JellyfinTheme
@@ -45,6 +46,9 @@ class MainActivity : FragmentActivity() {
 		applyTheme()
 
 		super.onCreate(savedInstanceState)
+
+		// Requests that fail with a TLS problem only leave empty rows, explain it
+		lifecycle.addObserver(TlsProblemToast(this))
 
 		if (!validateAuthentication()) return
 

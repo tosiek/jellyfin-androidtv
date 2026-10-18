@@ -33,8 +33,10 @@ import org.jellyfin.androidtv.auth.model.User
 import org.jellyfin.androidtv.auth.repository.AuthenticationRepository
 import org.jellyfin.androidtv.auth.repository.ServerRepository
 import org.jellyfin.androidtv.auth.repository.ServerUserRepository
+import org.jellyfin.androidtv.auth.repository.SessionRepository
 import org.jellyfin.androidtv.data.service.BackgroundService
 import org.jellyfin.androidtv.databinding.FragmentServerBinding
+import org.jellyfin.androidtv.tls.TlsMessages
 import org.jellyfin.androidtv.ui.ServerButtonView
 import org.jellyfin.androidtv.ui.card.UserCardView
 import org.jellyfin.androidtv.ui.startup.StartupViewModel
@@ -55,6 +57,7 @@ class ServerFragment : Fragment() {
 	private val authenticationRepository: AuthenticationRepository by inject()
 	private val serverUserRepository: ServerUserRepository by inject()
 	private val backgroundService: BackgroundService by inject()
+	private val sessionRepository: SessionRepository by inject()
 	private var _binding: FragmentServerBinding? = null
 	private val binding get() = _binding!!
 
@@ -83,8 +86,8 @@ class ServerFragment : Fragment() {
 						putString(UserLoginFragment.ARG_USERNAME, user.name)
 					})
 					// Errors
-					ServerUnavailableState,
-					is ApiClientErrorLoginState -> Toast.makeText(context, R.string.server_connection_failed, Toast.LENGTH_LONG).show()
+					ServerUnavailableState -> Toast.makeText(context, R.string.server_connection_failed, Toast.LENGTH_LONG).show()
+					is ApiClientErrorLoginState -> showConnectionError(server.address, state.error)
 
 					is ServerVersionNotSupported -> Toast.makeText(
 						context,
@@ -111,6 +114,9 @@ class ServerFragment : Fragment() {
 			}.launchIn(viewLifecycleOwner.lifecycleScope)
 
 		startupViewModel.loadUsers(server)
+
+		// The automatic sign-in failed: say why (a TLS problem such as a missing client certificate, or unreachable)
+		sessionRepository.takeSessionError(server.id)?.let { error -> showConnectionError(server.address, error) }
 
 		onServerChange(server)
 
@@ -245,5 +251,12 @@ class ServerFragment : Fragment() {
 			val cardView: UserCardView,
 		) : RecyclerView.ViewHolder(cardView)
 	}
+
+	// A TLS problem (untrusted server, missing client certificate) is explained
+	private fun showConnectionError(address: String, error: Throwable) = Toast.makeText(
+		context,
+		TlsMessages.describe(requireContext(), address, error) ?: getString(R.string.server_connection_failed),
+		Toast.LENGTH_LONG,
+	).show()
 }
 

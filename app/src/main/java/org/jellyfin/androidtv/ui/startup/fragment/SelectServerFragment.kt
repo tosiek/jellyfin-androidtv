@@ -38,6 +38,7 @@ import org.jellyfin.androidtv.auth.model.ServerAdditionState
 import org.jellyfin.androidtv.auth.model.UnableToConnectState
 import org.jellyfin.androidtv.data.repository.NotificationsRepository
 import org.jellyfin.androidtv.databinding.FragmentSelectServerBinding
+import org.jellyfin.androidtv.tls.TlsMessages
 import org.jellyfin.androidtv.ui.ServerButtonView
 import org.jellyfin.androidtv.ui.SpacingItemDecoration
 import org.jellyfin.androidtv.ui.base.JellyfinTheme
@@ -120,7 +121,11 @@ class SelectServerFragment : Fragment() {
 								getString(
 									R.string.server_connection_failed_candidates,
 									state.addressCandidates
-										.map { "${it.key} ${it.value.getSummary(requireContext())}" }
+										.map { (address, issues) ->
+											val summary = TlsMessages.describe(requireContext(), address, issues)
+												?: issues.getSummary(requireContext())
+											"$address $summary"
+										}
 										.joinToString(prefix = "\n", separator = "\n")
 								),
 								Toast.LENGTH_LONG,

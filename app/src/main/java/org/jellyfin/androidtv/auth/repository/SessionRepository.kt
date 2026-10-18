@@ -45,6 +45,12 @@ interface SessionRepository {
 	suspend fun restoreSession(destroyOnly: Boolean)
 	suspend fun switchCurrentSession(serverId: UUID, userId: UUID): Boolean
 	fun destroyCurrentSession()
+
+	/**
+	 * The error of the last failed attempt to use a stored session of the server (automatic sign-in), once: the user
+	 * selection explains it instead of appearing without a reason.
+	 */
+	fun takeSessionError(serverId: UUID): ApiClientException?
 }
 
 class SessionRepositoryImpl(
@@ -62,6 +68,12 @@ class SessionRepositoryImpl(
 	override val currentSession = _currentSession.asStateFlow()
 	private val _state = MutableStateFlow(SessionRepositoryState.READY)
 	override val state = _state.asStateFlow()
+	private var sessionError: Pair<UUID, ApiClientException>? = null
+
+	override fun takeSessionError(serverId: UUID): ApiClientException? = sessionError
+		?.takeIf { it.first == serverId }
+		?.second
+		?.also { sessionError = null }
 
 	override suspend fun restoreSession(destroyOnly: Boolean): Unit = withContext(NonCancellable) {
 		currentSessionMutex.withLock {
@@ -148,9 +160,11 @@ class SessionRepositoryImpl(
 				serverRepository.setCurrentServer(server)
 			} catch (err: ApiClientException) {
 				Timber.e(err, "Unable to authenticate: bad response when getting user info")
+				sessionError = session.serverId to err
 				destroyCurrentSession()
 				return false
 			}
+			sessionError = null
 
 			// Update crash reporting URL
 			val crashReportUrl = userApiClient.clientLogApi.logFileUrl()
