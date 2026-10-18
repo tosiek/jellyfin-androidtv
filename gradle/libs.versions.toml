@@ -22,6 +22,9 @@ androidx-navigation3 = "1.1.7"
 androidx-preference = "1.2.1"
 androidx-recyclerview = "1.4.0"
 androidx-startup = "1.2.0"
+androidx-test-core = "1.7.0"
+androidx-test-espresso = "3.7.0"
+androidx-test-runner = "1.7.0"
 androidx-tvprovider = "1.1.0"
 androidx-window = "1.5.1"
 androidx-work = "2.11.2"
@@ -70,10 +73,14 @@ androidx-cardview = { module = "androidx.cardview:cardview", version.ref = "andr
 androidx-compose-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "androidx-compose-foundation" }
 androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "androidx-compose-ui" }
 androidx-compose-ui-graphics = { module = "androidx.compose.ui:ui-graphics", version.ref = "androidx-compose-ui" }
+androidx-compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "androidx-compose-ui" }
+androidx-compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "androidx-compose-ui" }
 androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "androidx-constraintlayout" }
 androidx-core = { module = "androidx.core:core-ktx", version.ref = "androidx-core" }
 androidx-fragment = { module = "androidx.fragment:fragment-ktx", version.ref = "androidx-fragment" }
 androidx-fragment-compose = { module = "androidx.fragment:fragment-compose", version.ref = "androidx-fragment" }
+androidx-fragment-testing = { module = "androidx.fragment:fragment-testing", version.ref = "androidx-fragment" }
+androidx-fragment-testing-manifest = { module = "androidx.fragment:fragment-testing-manifest", version.ref = "androidx-fragment" }
 androidx-leanback-core = { module = "androidx.leanback:leanback", version.ref = "androidx-leanback" }
 androidx-leanback-preference = { module = "androidx.leanback:leanback-preference", version.ref = "androidx-leanback" }
 androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "androidx-lifecycle" }
@@ -84,6 +91,10 @@ androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", vers
 androidx-preference = { module = "androidx.preference:preference-ktx", version.ref = "androidx-preference" }
 androidx-recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "androidx-recyclerview" }
 androidx-startup = { module = "androidx.startup:startup-runtime", version.ref = "androidx-startup" }
+androidx-test-core = { module = "androidx.test:core", version.ref = "androidx-test-core" }
+androidx-test-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "androidx-test-espresso" }
+androidx-test-espresso-intents = { module = "androidx.test.espresso:espresso-intents", version.ref = "androidx-test-espresso" }
+androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidx-test-runner" }
 androidx-tvprovider = { module = "androidx.tvprovider:tvprovider", version.ref = "androidx-tvprovider" }
 androidx-window = { module = "androidx.window:window", version.ref = "androidx-window" }
 androidx-work-runtime = { module = "androidx.work:work-runtime", version.ref = "androidx-work" }

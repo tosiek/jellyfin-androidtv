@@ -17,7 +17,12 @@ android {
 		applicationId = namespace
 		versionName = project.getVersionName()
 		versionCode = getVersionCode(versionName!!)
+
+		testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 	}
+
+	// Share the TLS test fixtures between unit and instrumented tests
+	sourceSets["androidTest"].assets.directories.add("src/test/resources")
 
 	buildFeatures {
 		buildConfig = true
@@ -187,4 +192,12 @@ dependencies {
 	testImplementation(libs.kotest.runner.junit5)
 	testImplementation(libs.kotest.assertions)
 	testImplementation(libs.mockk)
+	androidTestImplementation(libs.androidx.test.runner)
+	androidTestImplementation(libs.androidx.test.core)
+	androidTestImplementation(libs.androidx.test.espresso.core)
+	androidTestImplementation(libs.androidx.test.espresso.intents)
+	androidTestImplementation(libs.androidx.fragment.testing)
+	androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+	debugImplementation(libs.androidx.fragment.testing.manifest)
+	debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

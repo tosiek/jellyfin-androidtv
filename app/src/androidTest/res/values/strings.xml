@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- The debug build type sets app_name via resValue("@string/app_name_debug"), which also applies to the test APK -->
+    <string name="app_name_debug" translatable="false" tools:ignore="UnusedResources">Jellyfin Debug Tests</string>
+</resources>
