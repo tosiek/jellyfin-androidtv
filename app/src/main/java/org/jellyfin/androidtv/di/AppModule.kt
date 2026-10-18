@@ -28,6 +28,7 @@ import org.jellyfin.androidtv.data.repository.UserViewsRepository
 import org.jellyfin.androidtv.data.repository.UserViewsRepositoryImpl
 import org.jellyfin.androidtv.data.service.BackgroundService
 import org.jellyfin.androidtv.integration.dream.DreamViewModel
+import org.jellyfin.androidtv.tls.TlsManager
 import org.jellyfin.androidtv.ui.InteractionTrackerViewModel
 import org.jellyfin.androidtv.ui.itemhandling.ItemLauncher
 import org.jellyfin.androidtv.ui.navigation.Destinations
@@ -79,7 +80,7 @@ val defaultDeviceInfo = named("defaultDeviceInfo")
 val appModule = module {
 	// SDK
 	single(defaultDeviceInfo) { androidDevice(get()) }
-	single { OkHttpFactory() }
+	single { OkHttpFactory(TlsManager.get(androidContext()).okHttpClient) }
 	single { HttpClientOptions() }
 	single {
 		createJellyfin {

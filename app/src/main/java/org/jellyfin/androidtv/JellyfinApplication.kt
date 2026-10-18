@@ -3,10 +3,12 @@ package org.jellyfin.androidtv
 import android.app.Application
 import android.content.Context
 import org.jellyfin.androidtv.telemetry.TelemetryService
+import org.jellyfin.androidtv.tls.TlsManager
 
 class JellyfinApplication : Application() {
 	override fun attachBaseContext(base: Context?) {
 		super.attachBaseContext(base)
+		TlsManager.install(this)
 		TelemetryService.init(this)
 	}
 }
