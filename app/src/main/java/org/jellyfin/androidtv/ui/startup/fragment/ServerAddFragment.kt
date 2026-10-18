@@ -12,11 +12,14 @@ import androidx.fragment.app.replace
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import org.jellyfin.androidtv.R
 import org.jellyfin.androidtv.auth.model.ConnectedState
 import org.jellyfin.androidtv.auth.model.ConnectingState
 import org.jellyfin.androidtv.auth.model.UnableToConnectState
 import org.jellyfin.androidtv.databinding.FragmentServerAddBinding
+import org.jellyfin.androidtv.tls.ServerAddCertificates
+import org.jellyfin.androidtv.tls.TlsMessages
 import org.jellyfin.androidtv.ui.startup.ServerAddViewModel
 import org.jellyfin.androidtv.util.createBundle
 import org.jellyfin.androidtv.util.getSummary
@@ -32,6 +35,9 @@ class ServerAddFragment : Fragment() {
 	private val binding get() = _binding!!
 
 	private val serverAddressArgument get() = arguments?.getString(ARG_SERVER_ADDRESS)?.ifBlank { null }
+
+	// Certificates selected in the advanced section, only kept after a successful connection
+	private val certificates = ServerAddCertificates(this)
 
 	override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
 		_binding = FragmentServerAddBinding.inflate(inflater, container, false)
@@ -52,6 +58,8 @@ class ServerAddFragment : Fragment() {
 		with(binding.confirm) {
 			setOnClickListener { submitAddress() }
 		}
+
+		certificates.attach(binding.advanced, binding.advancedSection, binding.address, binding.advancedSection.parent as ViewGroup)
 
 		return binding.root
 	}
@@ -85,12 +93,18 @@ class ServerAddFragment : Fragment() {
 					binding.error.text = getString(
 						R.string.server_connection_failed_candidates,
 						state.addressCandidates
-							.map { "${it.key} - ${it.value.getSummary(requireContext())}" }
+							.map { (address, issues) ->
+								val summary = TlsMessages.describe(requireContext(), address, issues)
+									?: issues.getSummary(requireContext())
+								"$address - $summary"
+							}
 							.joinToString(prefix = "\n", separator = "\n")
 					)
+					certificates.onFailed()
 				}
 
 				is ConnectedState -> parentFragmentManager.commit {
+					certificates.onConnected()
 					// Open server view
 					replace<StartupToolbarFragment>(R.id.content_view)
 					add<ServerFragment>(
@@ -110,11 +124,23 @@ class ServerAddFragment : Fragment() {
 	override fun onDestroyView() {
 		super.onDestroyView()
 
+		certificates.detach()
 		_binding = null
 	}
 
 	private fun submitAddress() = when {
-		binding.address.text.isNotBlank() -> startupViewModel.addServer(binding.address.text.toString())
+		binding.address.text.isNotBlank() -> addServer(binding.address.text.toString())
 		else -> binding.error.setText(R.string.server_field_empty)
+	}
+
+	private fun addServer(address: String) {
+		lifecycleScope.launch {
+			// Use the selected certificates for the connection check
+			certificates.apply()?.let { error ->
+				binding.error.text = error
+				return@launch
+			}
+			startupViewModel.addServer(address)
+		}
 	}
 }

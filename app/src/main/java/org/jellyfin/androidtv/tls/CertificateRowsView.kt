@@ -43,7 +43,19 @@ class CertificateRowsView @JvmOverloads constructor(
 		orientation = VERTICAL
 		addView(httpsOnly)
 		addView(loadFromUrlCheckBox)
-		rows.values.forEach { addView(it.container) }
+		// CA and client certificate side by side, the system store button below them across the width
+		addView(LinearLayout(context).apply {
+			orientation = HORIZONTAL
+			rows.values.forEach { row -> addView(row.container, LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f)) }
+		})
+		rows.values.forEach { row -> row.chooseSystem?.let { addView(it, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)) } }
+
+		// D-pad: the full-width checkbox and system store button are closer to the client row, down and up would skip
+		// the CA row. Lead them to the CA row, the client row is to its right.
+		val caChoose = rows.getValue(CertificateKind.CA).choose
+		caChoose.id = generateViewId()
+		loadFromUrlCheckBox.nextFocusDownId = caChoose.id
+		rows.getValue(CertificateKind.CLIENT).chooseSystem?.nextFocusUpId = caChoose.id
 	}
 
 	fun update(httpsAvailable: Boolean, ca: CertificateLabel?, client: CertificateLabel?) {
@@ -55,13 +67,11 @@ class CertificateRowsView @JvmOverloads constructor(
 
 	private inner class Row(kind: CertificateKind) {
 		val value = text("")
+		val choose = button(context.getString(R.string.tls_choose)) { onChoose(kind, loadFromUrl) }
 		val remove = button(context.getString(R.string.tls_remove)) { onRemove(kind) }
-		val buttons = listOf(
-			button(context.getString(R.string.tls_choose)) { onChoose(kind, loadFromUrl) },
-			remove,
-		)
+		val buttons = listOf(choose, remove)
 
-		// Own line, does not fit next to the other buttons
+		// Own line below both rows, does not fit next to the other buttons
 		val chooseSystem = if (kind == CertificateKind.CLIENT) {
 			button(context.getString(R.string.tls_client_choose_system)) { onChooseSystem?.invoke() }
 				.apply { visibility = View.GONE }
@@ -78,7 +88,6 @@ class CertificateRowsView @JvmOverloads constructor(
 				orientation = HORIZONTAL
 				buttons.forEach(::addView)
 			})
-			chooseSystem?.let(::addView)
 		}
 
 		fun update(enabled: Boolean, label: CertificateLabel?) {

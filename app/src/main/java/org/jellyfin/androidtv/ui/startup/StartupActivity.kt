@@ -4,8 +4,10 @@ import android.Manifest
 import android.app.SearchManager
 import android.content.Intent
 import android.os.Bundle
+import android.os.PowerManager
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.getSystemService
 import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.add
@@ -106,6 +108,31 @@ class StartupActivity : FragmentActivity() {
 		super.onResume()
 
 		applyTheme()
+	}
+
+	// Replaces android:noHistory: the start screens are not kept once the user leaves them, but a screen of another app
+	// opened for a result (the certificate file picker of the connect screen) returns to them. With noHistory the
+	// activity was finished as soon as the picker covered it and the picked file was lost.
+	private var waitingForResult = false
+
+	@Suppress("OVERRIDE_DEPRECATION")
+	override fun startActivityForResult(intent: Intent, requestCode: Int, options: Bundle?) {
+		waitingForResult = true
+		super.startActivityForResult(intent, requestCode, options)
+	}
+
+	@Suppress("OVERRIDE_DEPRECATION")
+	override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+		waitingForResult = false
+		super.onActivityResult(requestCode, resultCode, data)
+	}
+
+	override fun onStop() {
+		super.onStop()
+
+		// Like noHistory: not when the screen turns off or for a configuration change
+		val screenOn = getSystemService<PowerManager>()?.isInteractive != false
+		if (!waitingForResult && !isChangingConfigurations && screenOn) finish()
 	}
 
 	private fun onPermissionsGranted() = sessionRepository.state

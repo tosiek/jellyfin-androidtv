@@ -115,8 +115,8 @@
             android:name=".ui.startup.StartupActivity"
             android:exported="true"
             android:launchMode="singleTask"
-            android:noHistory="true"
             android:windowSoftInputMode="adjustNothing">
+            <!-- No android:noHistory, StartupActivity finishes itself in onStop (see there) -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.SEARCH" />

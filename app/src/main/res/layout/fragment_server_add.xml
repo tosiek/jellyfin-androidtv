@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Scrollable, the expanded "Advanced" certificates section does not fit on TV screens -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginHorizontal="48dp"
-    android:layout_marginVertical="27dp"
+    android:fillViewport="true"
     tools:context=".ui.startup.StartupActivity">
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="48dp"
+    android:layout_marginVertical="27dp">
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/center"
@@ -64,6 +70,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/address" />
 
+    <Button
+        android:id="@+id/advanced"
+        style="@style/Button.Default"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:text="@string/tls_advanced"
+        app:layout_constraintStart_toEndOf="@id/confirm"
+        app:layout_constraintTop_toTopOf="@id/confirm" />
+
+    <!-- Right under the buttons as without the advanced section, an error below the certificates was off-screen -->
     <TextView
         android:id="@+id/error"
         android:layout_width="0dp"
@@ -73,4 +90,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/confirm"
         tools:text="@string/server_connecting" />
+
+    <FrameLayout
+        android:id="@+id/advanced_section"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toStartOf="@id/center"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/error" />
 </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
