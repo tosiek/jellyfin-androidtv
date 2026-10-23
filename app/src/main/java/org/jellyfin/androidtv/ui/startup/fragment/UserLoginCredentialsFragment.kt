@@ -88,7 +88,10 @@ class UserLoginCredentialsFragment : Fragment() {
 
 						AuthenticatingState -> binding.error.setText(R.string.login_authenticating)
 						RequireSignInState -> binding.error.setText(R.string.login_invalid_credentials)
-						ServerUnavailableState -> binding.error.setText(R.string.login_server_unavailable)
+						is ServerUnavailableState -> binding.error.text = listOfNotNull(
+							getString(R.string.login_server_unavailable),
+							state.error?.let { ConnectionFailure.details(requireContext(), it) },
+						).joinToString(separator = "\n")
 						is ApiClientErrorLoginState -> binding.error.text = listOfNotNull(
 							getString(R.string.login_server_unavailable),
 							ConnectionFailure.details(requireContext(), state.error),

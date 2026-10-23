@@ -87,7 +87,7 @@ class AuthenticationRepositoryImpl(
 			response.content
 		} catch (err: TimeoutException) {
 			Timber.e(err, "Failed to connect to server trying to sign in $username")
-			emit(ServerUnavailableState)
+			emit(ServerUnavailableState(err))
 			return@flow
 		} catch (err: ApiClientException) {
 			Timber.e(err, "Unable to sign in as $username")
@@ -105,7 +105,7 @@ class AuthenticationRepositoryImpl(
 			response.content
 		} catch (err: TimeoutException) {
 			Timber.e(err, "Failed to connect to server")
-			emit(ServerUnavailableState)
+			emit(ServerUnavailableState(err))
 			return@flow
 		} catch (err: ApiClientException) {
 			Timber.e(err, "Unable to sign in with Quick Connect secret")
@@ -153,7 +153,7 @@ class AuthenticationRepositoryImpl(
 			emit(AuthenticatedState)
 		} catch (err: TimeoutException) {
 			Timber.e(err, "Failed to connect to server")
-			emit(ServerUnavailableState)
+			emit(ServerUnavailableState(err))
 			return@flow
 		} catch (err: ApiClientException) {
 			Timber.e(err, "Unable to get current user data")
