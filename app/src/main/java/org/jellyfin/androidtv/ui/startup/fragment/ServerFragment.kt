@@ -87,7 +87,7 @@ class ServerFragment : Fragment() {
 						putString(UserLoginFragment.ARG_USERNAME, user.name)
 					})
 					// Errors
-					ServerUnavailableState -> Toast.makeText(context, R.string.server_connection_failed, Toast.LENGTH_LONG).show()
+					is ServerUnavailableState -> showConnectionError(server.address, state.error)
 					is ApiClientErrorLoginState -> showConnectionError(server.address, state.error)
 
 					is ServerVersionNotSupported -> Toast.makeText(

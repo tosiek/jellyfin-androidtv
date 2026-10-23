@@ -80,17 +80,8 @@ class UserLoginQuickConnectFragment : Fragment() {
 
 						AuthenticatingState -> binding.error.setText(R.string.login_authenticating)
 						RequireSignInState -> binding.error.setText(R.string.login_invalid_credentials)
-						ServerUnavailableState -> binding.error.setText(R.string.login_server_unavailable)
-						// A TLS problem (untrusted server, missing client certificate) is explained, other causes are mapped
-						is ApiClientErrorLoginState -> {
-							val tlsProblem = userLoginViewModel.server.value?.address
-								?.let { TlsMessages.describe(requireContext(), it, state.error) }
-							binding.error.text = listOfNotNull(
-								tlsProblem ?: getString(R.string.login_server_unavailable),
-								if (tlsProblem != null) ConnectionFailure.rawCause(state.error)
-								else ConnectionFailure.details(requireContext(), state.error),
-							).joinToString(separator = "\n")
-						}
+						is ServerUnavailableState -> binding.error.text = errorText(state.error)
+						is ApiClientErrorLoginState -> binding.error.text = errorText(state.error)
 						// Do nothing because the activity will respond to the new session
 						AuthenticatedState -> Unit
 						// Not initialized
@@ -117,5 +108,20 @@ class UserLoginQuickConnectFragment : Fragment() {
 			if (index != 0 && index % interval == 0) append(" ")
 			append(character)
 		}
+	}
+
+	// A TLS problem (untrusted server, missing client certificate) is explained, other causes are mapped,
+	// the technical cause is added to both
+	private fun errorText(error: Throwable?): String {
+		val address = userLoginViewModel.server.value?.address
+		val tlsProblem = if (error != null && address != null) TlsMessages.describe(requireContext(), address, error) else null
+		return listOfNotNull(
+			tlsProblem ?: getString(R.string.login_server_unavailable),
+			when {
+				error == null -> null
+				tlsProblem != null -> ConnectionFailure.rawCause(error)
+				else -> ConnectionFailure.details(requireContext(), error)
+			},
+		).joinToString(separator = "\n")
 	}
 }
