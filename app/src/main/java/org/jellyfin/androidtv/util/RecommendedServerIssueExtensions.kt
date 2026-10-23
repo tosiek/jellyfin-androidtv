@@ -5,17 +5,25 @@ import org.jellyfin.androidtv.R
 import org.jellyfin.androidtv.auth.repository.ServerRepository
 import org.jellyfin.sdk.discovery.RecommendedServerIssue
 
+// The issue follows an address in a list of addresses: the raw cause goes indented on its own line
+private const val DETAILS_SEPARATOR = "\n    "
+
 /**
  * Create a localized string with the message to show an end-user of the app.
  */
 fun RecommendedServerIssue.getFriendlyMessage(context: Context): String = when (this) {
 	// Connection issues
-	is RecommendedServerIssue.SecureConnectionFailed -> context.getString(R.string.server_issue_ssl_handshake)
+	is RecommendedServerIssue.SecureConnectionFailed -> listOfNotNull(
+		context.getString(R.string.server_issue_ssl_handshake),
+		ConnectionFailure.rawCause(sslException),
+	).joinToString(separator = DETAILS_SEPARATOR)
 	is RecommendedServerIssue.SlowResponse -> context.getString(R.string.server_issue_timeout)
-	is RecommendedServerIssue.ServerUnreachable -> context.getString(R.string.server_issue_unable_to_connect)
+	is RecommendedServerIssue.ServerUnreachable -> ConnectionFailure.details(context, throwable, DETAILS_SEPARATOR)
+		?: context.getString(R.string.server_issue_unable_to_connect)
 
 	// Response issues
-	is RecommendedServerIssue.MissingSystemInfo -> context.getString(R.string.server_issue_unable_to_connect)
+	is RecommendedServerIssue.MissingSystemInfo -> throwable?.let { ConnectionFailure.details(context, it, DETAILS_SEPARATOR) }
+		?: context.getString(R.string.server_issue_unable_to_connect)
 	is RecommendedServerIssue.InvalidProductName -> context.getString(R.string.server_issue_invalid_product)
 	RecommendedServerIssue.MissingVersion -> context.getString(R.string.server_issue_missing_version)
 

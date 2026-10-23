@@ -40,6 +40,7 @@ import org.jellyfin.androidtv.tls.TlsMessages
 import org.jellyfin.androidtv.ui.ServerButtonView
 import org.jellyfin.androidtv.ui.card.UserCardView
 import org.jellyfin.androidtv.ui.startup.StartupViewModel
+import org.jellyfin.androidtv.util.ConnectionFailure
 import org.jellyfin.androidtv.util.ListAdapter
 import org.jellyfin.androidtv.util.MarkdownRenderer
 import org.jellyfin.androidtv.util.createBundle
@@ -252,11 +253,19 @@ class ServerFragment : Fragment() {
 		) : RecyclerView.ViewHolder(cardView)
 	}
 
-	// A TLS problem (untrusted server, missing client certificate) is explained
-	private fun showConnectionError(address: String, error: Throwable) = Toast.makeText(
-		context,
-		TlsMessages.describe(requireContext(), address, error) ?: getString(R.string.server_connection_failed),
-		Toast.LENGTH_LONG,
-	).show()
+	// A TLS problem (untrusted server, missing client certificate) is explained, other causes are mapped,
+	// the technical cause is added to both
+	private fun showConnectionError(address: String, error: Throwable?) {
+		val tlsProblem = error?.let { TlsMessages.describe(requireContext(), address, it) }
+		val text = listOfNotNull(
+			tlsProblem ?: getString(R.string.server_connection_failed),
+			when {
+				error == null -> null
+				tlsProblem != null -> ConnectionFailure.rawCause(error)
+				else -> ConnectionFailure.details(requireContext(), error)
+			},
+		).joinToString(separator = "\n")
+		Toast.makeText(context, text, Toast.LENGTH_LONG).show()
+	}
 }
 

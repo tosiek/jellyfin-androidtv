@@ -23,6 +23,7 @@ import org.jellyfin.androidtv.auth.repository.ServerRepository
 import org.jellyfin.androidtv.databinding.FragmentUserLoginCredentialsBinding
 import org.jellyfin.androidtv.tls.TlsMessages
 import org.jellyfin.androidtv.ui.startup.UserLoginViewModel
+import org.jellyfin.androidtv.util.ConnectionFailure
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
 
 class UserLoginCredentialsFragment : Fragment() {
@@ -89,10 +90,16 @@ class UserLoginCredentialsFragment : Fragment() {
 						AuthenticatingState -> binding.error.setText(R.string.login_authenticating)
 						RequireSignInState -> binding.error.setText(R.string.login_invalid_credentials)
 						ServerUnavailableState -> binding.error.setText(R.string.login_server_unavailable)
-						// A TLS problem (untrusted server, missing client certificate) is explained
-						is ApiClientErrorLoginState -> binding.error.text = userLoginViewModel.server.value?.address
-							?.let { TlsMessages.describe(requireContext(), it, state.error) }
-							?: getString(R.string.login_server_unavailable)
+						// A TLS problem (untrusted server, missing client certificate) is explained, other causes are mapped
+						is ApiClientErrorLoginState -> {
+							val tlsProblem = userLoginViewModel.server.value?.address
+								?.let { TlsMessages.describe(requireContext(), it, state.error) }
+							binding.error.text = listOfNotNull(
+								tlsProblem ?: getString(R.string.login_server_unavailable),
+								if (tlsProblem != null) ConnectionFailure.rawCause(state.error)
+								else ConnectionFailure.details(requireContext(), state.error),
+							).joinToString(separator = "\n")
+						}
 						// Do nothing because the activity will respond to the new session
 						AuthenticatedState -> Unit
 						// Not initialized

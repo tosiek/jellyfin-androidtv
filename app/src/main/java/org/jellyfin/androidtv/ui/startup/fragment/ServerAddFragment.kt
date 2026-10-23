@@ -93,11 +93,11 @@ class ServerAddFragment : Fragment() {
 					binding.error.text = getString(
 						R.string.server_connection_failed_candidates,
 						state.addressCandidates
-							.map { (address, issues) ->
-								val summary = TlsMessages.describe(requireContext(), address, issues)
-									?: issues.getSummary(requireContext())
-								"$address - $summary"
-							}
+							// Addresses that failed the same way (e.g. https:// and http:// of a stopped server) share one summary
+							.entries.groupBy({ (address, issues) ->
+								TlsMessages.describe(requireContext(), address, issues) ?: issues.getSummary(requireContext())
+							}, { it.key })
+							.map { (summary, addresses) -> "${addresses.joinToString(separator = ", ")} - $summary" }
 							.joinToString(prefix = "\n", separator = "\n")
 					)
 					certificates.onFailed()
