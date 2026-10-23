@@ -120,7 +120,9 @@ class SelectServerFragment : Fragment() {
 								getString(
 									R.string.server_connection_failed_candidates,
 									state.addressCandidates
-										.map { "${it.key} ${it.value.getSummary(requireContext())}" }
+										// Addresses that failed the same way (e.g. https:// and http:// of a stopped server) share one summary
+										.entries.groupBy({ it.value.getSummary(requireContext()) }, { it.key })
+										.map { (summary, addresses) -> "${addresses.joinToString(separator = ", ")} $summary" }
 										.joinToString(prefix = "\n", separator = "\n")
 								),
 								Toast.LENGTH_LONG,

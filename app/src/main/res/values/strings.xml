@@ -459,6 +459,16 @@
     <string name="server_issue_outdated_version">Server uses unsupported version %1$s. Please update to %2$s or newer</string>
     <string name="server_issue_timeout">Connection timed out</string>
     <string name="server_issue_ssl_handshake">SSL handshake failed</string>
+    <string name="server_issue_cause_redirect">The server redirects (HTTP %1$d). Check the address and its path, e.g. /jellyfin.</string>
+    <string name="server_issue_cause_access_denied">The server refused access (HTTP %1$d).</string>
+    <string name="server_issue_cause_not_found">Nothing found at this address (HTTP 404). Check the path.</string>
+    <string name="server_issue_cause_server_error">The server reported an error (HTTP %1$d).</string>
+    <string name="server_issue_cause_http_status">Unexpected answer from the server (HTTP %1$d).</string>
+    <string name="server_issue_cause_unknown_host">The host name could not be resolved.</string>
+    <string name="server_issue_cause_refused">The connection was refused. Is the server running and the port correct?</string>
+    <string name="server_issue_cause_timeout">The server did not answer in time.</string>
+    <string name="server_issue_cause_tls">Secure connection failed.</string>
+    <string name="server_issue_cause_not_jellyfin">The answer is not from a Jellyfin server.</string>
     <string name="pref_customization">Customization</string>
     <string name="sort_accounts_by">Sort accounts by</string>
     <string name="pref_accounts">Accounts</string>

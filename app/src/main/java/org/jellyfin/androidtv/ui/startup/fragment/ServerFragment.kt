@@ -38,6 +38,7 @@ import org.jellyfin.androidtv.databinding.FragmentServerBinding
 import org.jellyfin.androidtv.ui.ServerButtonView
 import org.jellyfin.androidtv.ui.card.UserCardView
 import org.jellyfin.androidtv.ui.startup.StartupViewModel
+import org.jellyfin.androidtv.util.ConnectionFailure
 import org.jellyfin.androidtv.util.ListAdapter
 import org.jellyfin.androidtv.util.MarkdownRenderer
 import org.jellyfin.androidtv.util.createBundle
@@ -83,8 +84,8 @@ class ServerFragment : Fragment() {
 						putString(UserLoginFragment.ARG_USERNAME, user.name)
 					})
 					// Errors
-					ServerUnavailableState,
-					is ApiClientErrorLoginState -> Toast.makeText(context, R.string.server_connection_failed, Toast.LENGTH_LONG).show()
+					ServerUnavailableState -> Toast.makeText(context, R.string.server_connection_failed, Toast.LENGTH_LONG).show()
+					is ApiClientErrorLoginState -> showConnectionError(state.error)
 
 					is ServerVersionNotSupported -> Toast.makeText(
 						context,
@@ -245,5 +246,15 @@ class ServerFragment : Fragment() {
 			val cardView: UserCardView,
 		) : RecyclerView.ViewHolder(cardView)
 	}
+
+	// The general message, then the reason and the technical cause when the error is known
+	private fun showConnectionError(error: Throwable?) = Toast.makeText(
+		context,
+		listOfNotNull(
+			getString(R.string.server_connection_failed),
+			error?.let { ConnectionFailure.details(requireContext(), it) },
+		).joinToString(separator = "\n"),
+		Toast.LENGTH_LONG,
+	).show()
 }
 
